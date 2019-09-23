@@ -12,9 +12,7 @@ import (
 	"math"
 	"net/http"
 	"os"
-	"os/exec"
 	"sort"
-	"strings"
 )
 
 func GetRange(c uint8) int {
@@ -41,6 +39,7 @@ func GetPalette(img image.Image) [][3]uint8 {
 			AreaAvg[GetRange(uint8(r/257))*9+GetRange(uint8(g/257))*3+GetRange(uint8(b/257))][2] += b / 257
 		}
 	}
+
 	for i, _ := range Area {
 		if Area[i] == 0 {
 			continue
@@ -57,6 +56,7 @@ func GetPalette(img image.Image) [][3]uint8 {
 		}
 		ret = append(ret, [3]uint8{uint8(AreaAvg[i][0]), uint8(AreaAvg[i][1]), uint8(AreaAvg[i][2])})
 	}
+
 	return ret
 }
 
@@ -68,6 +68,7 @@ func LoadImage(PathOrLink string) (image.Image, error) {
 		if err != nil {
 			return nil, err
 		}
+
 		body, _ := ioutil.ReadAll(response.Body)
 		defer response.Body.Close()
 		data = bytes.NewReader(body)
@@ -78,10 +79,12 @@ func LoadImage(PathOrLink string) (image.Image, error) {
 			return nil, err
 		}
 	}
+
 	img, _, err := image.Decode(data)
 	if err != nil {
 		return nil, err
 	}
+
 	return img, nil
 }
 
@@ -93,6 +96,7 @@ func ToHex(color [3]uint8) string {
 		}
 		ret += fmt.Sprintf("%X", c)
 	}
+
 	return ret
 }
 
@@ -105,6 +109,7 @@ func GetColor(color [][3]uint8, sample [3]uint8) [][3]uint8 {
 		}
 		return c1 < c2
 	})
+
 	return color
 }
 
@@ -115,9 +120,11 @@ func NormalizeColor(color [3]uint8) [3]uint8 {
 			min = c
 		}
 	}
+
 	for i, _ := range color {
 		color[i] -= min
 	}
+
 	return color
 }
 
@@ -131,34 +138,23 @@ func GetBG(color [3]uint8, brightness uint8) [3]uint8 {
 			norm[i] = 0
 			continue
 		}
+
 		norm[i] += brightness
 	}
+
 	return norm
 }
 
 func main() {
-	const (
-		XresourceCache = "/.cache/colterm/Xresources"
-	)
-
 	FileIn := flag.String("f", "", "Input file, use this option or put file behind the options")
-
 	BgBrightness := flag.Int("bg", 20, "Set background brightness(0 - 255)")
 	FgBrightness := flag.Int("fg", 150, "Set foreground brightness(0 - 255)")
-
-	FileExport := flag.String("e", "", "Export file to (Path)")
-	Tamplate := flag.String("t", "", "Create color scheme with a given tamplate file, created file will saved in your home directory")
-	PaletteOnly := flag.Bool("n", false, "Print colors only without applying to Xresources")
-
+	FileExport := flag.String("ex", "", "Export file to (Path)")
+	SchemeName := flag.String("sn", "unknown", "The name of the scheme to save to Xresources")
+	PaletteOnly := flag.Bool("po", true, "Print colors only without applying to Xresources")
 	flag.Parse()
 
-	if len(flag.Args()) == 0 && *FileIn == "" {
-		flag.PrintDefaults()
-		return
-	}
-
 	imgPath := *FileIn
-
 	if imgPath == "" {
 		imgPath = flag.Args()[0]
 	}
@@ -202,14 +198,15 @@ func main() {
 			}
 		}
 	}
+
 	if *BgBrightness != -1 {
 		ColorScheme[0] = GetBG(GetColor(Palette, ColorTamplete[0])[0], uint8(*BgBrightness))
 	}
+
 	if *FgBrightness != -1 {
 		ColorScheme[1] = GetBG(GetColor(Palette, ColorTamplete[1])[0], uint8(*FgBrightness))
 	}
 
-	fmt.Printf("   ¯\\_(•_•)_/¯   \nHeres your colors\n\n")
 	fmt.Printf("Background \033[48;2;%d;%d;%dm%s\033[49m\n", ColorScheme[0][0], ColorScheme[0][1], ColorScheme[0][2], ToHex(ColorScheme[0]))
 	fmt.Printf("Foreground \033[48;2;%d;%d;%dm%s\033[49m\n", ColorScheme[1][0], ColorScheme[1][1], ColorScheme[1][2], ToHex(ColorScheme[1]))
 	for i := 2; i < len(ColorScheme); i++ {
@@ -221,37 +218,10 @@ func main() {
 		return
 	}
 
-	if *Tamplate != "" {
-		StTamplate, err := ioutil.ReadFile(*Tamplate)
-		if err != nil {
-			panic(err)
-		}
-		StData := string(StTamplate)
-		StExport, err := os.Create(os.Getenv("HOME") + "/Colterm-" + *Tamplate)
-		defer StExport.Close()
-		if err != nil {
-			panic(err)
-		}
-
-		StData = strings.ReplaceAll(StData, "background", "#"+ToHex(ColorScheme[0]))
-		StData = strings.ReplaceAll(StData, "foreground", "#"+ToHex(ColorScheme[1]))
-		StData = strings.ReplaceAll(StData, "cursor", "#"+ToHex(ColorScheme[1]))
-		for i := 0; i < len(ColorScheme)-2; i++ {
-			StData = strings.ReplaceAll(StData, fmt.Sprintf("color%d", i), "#"+ToHex(ColorScheme[i+2]))
-			StData = strings.ReplaceAll(StData, fmt.Sprintf("color%d", i+8), "#"+ToHex(ColorScheme[i+2]))
-		}
-
-		_, err = StExport.Write([]byte(StData))
-		StExport.Close()
-		if err != nil {
-			panic(err)
-		}
-	}
-
 	// setting Xresources
 	var XresourcePath string
 	if *FileExport == "" {
-		XresourcePath = os.Getenv("HOME") + XresourceCache
+		XresourcePath = os.Getenv("HOME") + "/.xres/themes/" + *SchemeName
 	} else {
 		XresourcePath = *FileExport + "/ColTerm-Xresource"
 	}
@@ -262,20 +232,22 @@ func main() {
 	}
 
 	var XresourceData string
-	XresourceData += fmt.Sprintf("! Created by Colterm with %s\n", imgPath)
-	XresourceData += fmt.Sprintf("*.background: #%s\n", ToHex(ColorScheme[0]))
-	XresourceData += fmt.Sprintf("*.foreground: #%s\n", ToHex(ColorScheme[1]))
+	XresourceData += fmt.Sprintf("!! Colors (%s - %s)\n! defines\n", *SchemeName, imgPath)
+
+	// defines
+	XresourceData += fmt.Sprintf("#define BACKGROUND #%s\n", ToHex(ColorScheme[0]))
+	XresourceData += fmt.Sprintf("#define FOREGROUND #%s\n", ToHex(ColorScheme[1]))
 	for i := 0; i < 8; i++ {
-		XresourceData += fmt.Sprintf("*.color%d: #%s\n", i, ToHex(ColorScheme[i+2]))
+		XresourceData += fmt.Sprintf("#define COLOR%d: #%s\n", i, ToHex(ColorScheme[i+2]))
+	}
+
+	// colors
+	XresourceData += fmt.Sprint("\n! colors\n*foreground: FOREGROUND\n")
+	XresourceData += fmt.Sprint("*background: BACKGROUND\n")
+	for i := 0; i < 8; i++ {
+		XresourceData += fmt.Sprintf("*color%d: COLOR%d\n", i, i)
 	}
 
 	NewXre.Write([]byte(XresourceData))
-
-	ReloadXresource := exec.Command("xrdb", "-merge", "-quiet", os.Getenv("HOME")+XresourceCache)
-
-	err = ReloadXresource.Run()
-	if err != nil {
-		panic(err)
-	}
-
+	fmt.Printf("\nTheme saved to: \"%s\"\n", XresourcePath)
 }

@@ -238,7 +238,7 @@ func main() {
 	XresourceData += fmt.Sprintf("#define BACKGROUND #%s\n", ToHex(ColorScheme[0]))
 	XresourceData += fmt.Sprintf("#define FOREGROUND #%s\n", ToHex(ColorScheme[1]))
 	for i := 0; i < 8; i++ {
-		XresourceData += fmt.Sprintf("#define COLOR%d: #%s\n", i, ToHex(ColorScheme[i+2]))
+		XresourceData += fmt.Sprintf("#define COLOR%d #%s\n", i, ToHex(ColorScheme[i+2]))
 	}
 
 	// colors

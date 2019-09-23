@@ -44,6 +44,8 @@ OPTIONS:
         Print colors only without applying to Xresources (default true)
 ```
 
+Example: `./colterm -po=false -f=https://i.imgur.com/XULiMJ5.jpg -sn=purple` produces the same result as screenshot above.
+
 ## Binary Building
 
 `go build -o colterm .`

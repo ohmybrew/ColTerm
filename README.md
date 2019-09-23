@@ -2,7 +2,7 @@
 
 **Forked from: [@SeungheonOh/ColTerm](https://github.com/SeungheonOh/ColTerm/)**
 
-*Changes include: Modifications to flags, support for my custom Xresources scheme and [dotfile](https://github.com/ohmybrew/dots) setup*.
+*Changes include: Modifications to flags, added colors up to 16, support for my custom Xresources scheme and [dotfile](https://github.com/ohmybrew/dots) setup*.
 
 ---
 
@@ -53,26 +53,42 @@ Resulting file will look like:
 ! defines
 #define BACKGROUND #171423
 #define FOREGROUND #A496C6
-#define COLOR0: #5A0E50
-#define COLOR1: #B3439E
-#define COLOR2: #463A64
-#define COLOR3: #E8BFE9
-#define COLOR4: #742282
-#define COLOR5: #B83FC3
-#define COLOR6: #A1B3E2
-#define COLOR7: #C57DCE
+#define COLOR0 #5A0E50
+#define COLOR8 #5A0E50
+#define COLOR1 #B3439E
+#define COLOR9 #B3439E
+#define COLOR2 #463A64
+#define COLOR10 #463A64
+#define COLOR3 #E8BFE9
+#define COLOR11 #E8BFE9
+#define COLOR4 #742282
+#define COLOR12 #742282
+#define COLOR5 #B83FC3
+#define COLOR13 #B83FC3
+#define COLOR6 #A1B3E2
+#define COLOR14 #A1B3E2
+#define COLOR7 #C57DCE
+#define COLOR15 #C57DCE
 
 ! colors
 *foreground: FOREGROUND
 *background: BACKGROUND
 *color0: COLOR0
+*color8: COLOR8
 *color1: COLOR1
+*color9: COLOR9
 *color2: COLOR2
+*color10: COLOR10
 *color3: COLOR3
+*color11: COLOR11
 *color4: COLOR4
+*color12: COLOR12
 *color5: COLOR5
+*color13: COLOR13
 *color6: COLOR6
+*color14: COLOR14
 *color7: COLOR7
+*color15: COLOR15
 ```
 
 ## Binary Building

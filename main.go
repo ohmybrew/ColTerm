@@ -238,7 +238,9 @@ func main() {
 	XresourceData += fmt.Sprintf("#define BACKGROUND #%s\n", ToHex(ColorScheme[0]))
 	XresourceData += fmt.Sprintf("#define FOREGROUND #%s\n", ToHex(ColorScheme[1]))
 	for i := 0; i < 8; i++ {
-		XresourceData += fmt.Sprintf("#define COLOR%d #%s\n", i, ToHex(ColorScheme[i+2]))
+		csh := ToHex(ColorScheme[i+2])
+		XresourceData += fmt.Sprintf("#define COLOR%d #%s\n", i, csh)
+		XresourceData += fmt.Sprintf("#define COLOR%d #%s\n", i+8, csh)
 	}
 
 	// colors
@@ -246,6 +248,7 @@ func main() {
 	XresourceData += fmt.Sprint("*background: BACKGROUND\n")
 	for i := 0; i < 8; i++ {
 		XresourceData += fmt.Sprintf("*color%d: COLOR%d\n", i, i)
+		XresourceData += fmt.Sprintf("*color%d: COLOR%d\n", i+8, i+8)
 	}
 
 	NewXre.Write([]byte(XresourceData))

@@ -10,7 +10,7 @@ Simper, more Unix-philosophical implementation of auto colorscheme generator. It
 
 ## Things
 
-![ColTerm](https://github.com/SeungheonOh/ColTerm/blob/master/img/colterm.ong)
+![ColTerm](https://github.com/ohmybrew/ColTerm/blob/master/img/colterm.png)
 
 Well, as you notice, it's really similar to [pywal](https://github.com/dylanaraps/pywal). Unlike pywal, colterm is designed make a colorscheme only,
 but not to manage whole wallpaper system, therefore it's a lot simpler. You might ask, then why should I use it? I would say colterm would work best for those of you 
